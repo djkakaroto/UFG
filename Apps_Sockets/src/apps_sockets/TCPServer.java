@@ -5,11 +5,9 @@
  */
 package apps_sockets;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
 
 /**
  *
@@ -18,26 +16,23 @@ import java.net.Socket;
 public class TCPServer {
 
     public static void main(String argv[]) throws Exception {
-        String clientSentence;
-        String capitalizedSentence;
 
-        ServerSocket welcomeSocket = new ServerSocket(6789);
+        ServerSocket servidor = new ServerSocket(6789);
+        System.out.println("Iniciando servidor... ");
+        System.out.println("Listen: " + servidor.getLocalPort());
 
-        while (true) {
+        Socket cliente = servidor.accept();
+        System.out.println("Nova conexão com o cliente " + cliente.getInetAddress().getHostAddress());
 
-            Socket connectionSocket = welcomeSocket.accept();
+        Scanner entrada = new Scanner(cliente.getInputStream());
 
-            BufferedReader inFromClient
-                    = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-
-            DataOutputStream outToClient
-                    = new DataOutputStream(connectionSocket.getOutputStream());
-
-            clientSentence = inFromClient.readLine();
-
-            capitalizedSentence = clientSentence.toUpperCase() + '\n';
-
-            outToClient.writeBytes(capitalizedSentence);
+        while (entrada.hasNextLine()) {
+            System.out.println("Cliente send: " + entrada.nextLine());
         }
+
+        entrada.close();
+        servidor.close();
+
     }
+
 }
