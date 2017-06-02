@@ -5,10 +5,9 @@
  */
 package apps_sockets;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Scanner;
 
 /**
  *
@@ -17,27 +16,49 @@ import java.net.Socket;
 public class TCPClient {
 
     public static void main(String argv[]) throws Exception {
-        String sentence;
-        String modifiedSentence;
 
-        BufferedReader inFromUser
-                = new BufferedReader(new InputStreamReader(System.in));
+        Socket cliente = null;
+        Scanner teclado = null;
+        PrintStream saida = null;
+        boolean sair = false;
 
-        try (Socket clientSocket = new Socket("hostname", 6789)) {
-            
-            DataOutputStream outToServer
-                    = new DataOutputStream(clientSocket.getOutputStream());
-            BufferedReader inFromServer
-                    = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-            sentence = inFromUser.readLine();
-
-            outToServer.writeBytes(sentence + '\n');
-
-            modifiedSentence = inFromServer.readLine();
-
-            System.out.println("FROM SERVER: " + modifiedSentence);
+        // Conecta ao servidor
+        try {
+            cliente = new Socket("localhost", 6789);
+            System.out.println("Conectado ao " + cliente.getInetAddress().getHostAddress() + "\nPorta: " + cliente.getLocalPort() + "\n");
+        } catch (Exception e) {
+            System.err.println("Não foi possível se conectar ao servidor...");
         }
 
+        teclado = new Scanner(System.in);
+        saida = new PrintStream(cliente.getOutputStream());
+
+        do {
+            
+            String aux = null;
+            aux = teclado.nextLine();
+            aux = aux.replace("\n", "").replace("\r", "");
+            saida.println(aux);
+            //System.out.println("Saida: " + aux );
+
+            System.out.println("\nDeseja Sair: (S/N)");
+            String resp = teclado.nextLine();
+            resp = resp.replace("\n", "").replace("\r", "");
+            resp = resp.substring(0, 1);
+
+            // Verifica a resposta para continuar enviando
+            if (resp.equals("S") | resp.equals("s")) {
+                System.out.println("\nSaindo...");
+                sair = true;
+            } 
+             
+
+        } while (sair == false);
+
+        saida.close();
+        teclado.close();
+        cliente.close();
+
     }
+
 }
